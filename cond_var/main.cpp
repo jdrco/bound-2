@@ -24,7 +24,13 @@ void producer() {
 			cout << "Waiting for space in buffer..." << endl;
 			pthread_cond_wait(&condNotFull, &mutexBuffer);
 		}
-		buffer.push(n);
+        if (command == 'T') {
+            printf("Parent Work %d\n", n);
+		    buffer.push(n);
+        } else if (command == 'S') {
+            printf("Parent Sleep %d\n", n);
+            Sleep(n);
+        }
 		pthread_cond_signal(&condNotEmpty);
 		pthread_mutex_unlock(&mutexBuffer);
     }
@@ -32,11 +38,13 @@ void producer() {
     producerDone = true;
     pthread_cond_broadcast(&condNotEmpty);
     pthread_mutex_unlock(&mutexBuffer);
+    printf("Parent End\n");
 }
 
 void* consumer(void* args) {
     while (1) {
         pthread_mutex_lock(&mutexBuffer);
+        printf("Ask\n");
         while (buffer.empty() && !producerDone) {
             cout << "Waiting for tasks in buffer..." << endl;
             pthread_cond_wait(&condNotEmpty, &mutexBuffer);
@@ -49,7 +57,9 @@ void* consumer(void* args) {
         buffer.pop();
         pthread_cond_signal(&condNotFull);
         pthread_mutex_unlock(&mutexBuffer);
-        printf("Processing task %d \n", task);
+        printf("Thread Recieve %d\n", task);
+        Trans(task);
+        printf("Thread Complete %d\n", task);
     }
     return NULL;
 }

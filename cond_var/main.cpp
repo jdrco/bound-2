@@ -25,10 +25,10 @@ void producer() {
 			pthread_cond_wait(&condNotFull, &mutexBuffer);
 		}
         if (command == 'T') {
-            printf("Parent Work %d\n", n);
+            printf("Producer puts work %d\n", n);
 		    buffer.push(n);
         } else if (command == 'S') {
-            printf("Parent Sleep %d\n", n);
+            printf("Producer sleeps %d\n", n);
             Sleep(n);
         }
 		pthread_cond_signal(&condNotEmpty);
@@ -38,15 +38,15 @@ void producer() {
     producerDone = true;
     pthread_cond_broadcast(&condNotEmpty);
     pthread_mutex_unlock(&mutexBuffer);
-    printf("Parent End\n");
+    printf("Producer end\n");
 }
 
 void* consumer(void* args) {
+    int id = *((int*)args);
     while (1) {
         pthread_mutex_lock(&mutexBuffer);
-        printf("Ask\n");
+        printf("Consumer %d asks for work\n", id);
         while (buffer.empty() && !producerDone) {
-            cout << "Waiting for tasks in buffer..." << endl;
             pthread_cond_wait(&condNotEmpty, &mutexBuffer);
         }
         if (producerDone && buffer.empty()) {
@@ -57,20 +57,21 @@ void* consumer(void* args) {
         buffer.pop();
         pthread_cond_signal(&condNotFull);
         pthread_mutex_unlock(&mutexBuffer);
-        printf("Thread Recieve %d\n", task);
+        printf("Consumer %d receives task %d\n", id, task);
         Trans(task);
-        printf("Thread Complete %d\n", task);
+        printf("Consumer %d completes task %d\n", id, task);
     }
     return NULL;
 }
 
-
 int main() {
 	int nthreads = 3;
 	pthread_t consumerTh[nthreads];
+    int consumerId[nthreads];
 
 	for (int i = 0; i < nthreads; i++) {
-		if (pthread_create(&consumerTh[i], nullptr, &consumer, nullptr) != 0) {
+        consumerId[i] = i;
+		if (pthread_create(&consumerTh[i], nullptr, &consumer, &consumerId[i]) != 0) {
 			cerr << "Failed to create thread" << endl;
 		}
 	}

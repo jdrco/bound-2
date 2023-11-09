@@ -19,19 +19,18 @@ void producer() {
     char command;
     int n;
     while (inputFile >> command >> n) {
-        pthread_mutex_lock(&mutexBuffer);
-        while (buffer.size() == bufferSize) {
-            cout << "Waiting for space in buffer..." << endl;
-            pthread_cond_wait(&condNotFull, &mutexBuffer);
-        }
-        buffer.push(n);
-        pthread_cond_signal(&condNotEmpty);
-        pthread_mutex_unlock(&mutexBuffer);
+		pthread_mutex_lock(&mutexBuffer);
+		while (buffer.size() == bufferSize) {
+			cout << "Waiting for space in buffer..." << endl;
+			pthread_cond_wait(&condNotFull, &mutexBuffer);
+		}
+		buffer.push(n);
+		pthread_cond_signal(&condNotEmpty);
+		pthread_mutex_unlock(&mutexBuffer);
     }
-
     pthread_mutex_lock(&mutexBuffer);
     producerDone = true;
-    pthread_cond_broadcast(&condNotEmpty); // Wake up all consumers
+    pthread_cond_broadcast(&condNotEmpty);
     pthread_mutex_unlock(&mutexBuffer);
 }
 
@@ -50,8 +49,7 @@ void* consumer(void* args) {
         buffer.pop();
         pthread_cond_signal(&condNotFull);
         pthread_mutex_unlock(&mutexBuffer);
-
-        cout << "Processing task " << task << endl;
+        printf("Processing task %d \n", task);
     }
     return NULL;
 }

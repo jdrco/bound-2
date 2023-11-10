@@ -1,1 +1,6 @@
-bound-2-cond-var
+# Executables
+bound-2-condition
+bound-2-semaphore
+
+# Objects
+*.o

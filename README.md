@@ -6,7 +6,7 @@ This project models a scenario with one producer and multiple consumers who shar
 
 ## Solution 1 - Mutex & Condition Variables
 
-The `cond_var` directory is a solution that uses condition variables and mutexes.
+The `condition` directory is a solution that uses condition variables and mutexes.
 
 Run this solution:
 ```bash
